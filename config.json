@@ -1,5 +1,0 @@
-{
-  "connection_timeout": 30,
-  "ezyapi_server": "http://api.netway.ezyadmin.com/inventory/551a483d973ce19219324585",
-  "ezycli_server": "http://api.netway.ezyadmin.com/inventories/agent?org=551a483d973ce19219324585"
-}
