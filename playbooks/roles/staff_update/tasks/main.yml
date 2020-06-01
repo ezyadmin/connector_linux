@@ -1,0 +1,202 @@
+---
+# ======================================================================
+# ======================== Description =================================
+# ======================================================================
+- name: Display all variables/facts known for a host
+  debug:
+    msg : 
+      - "Patch Manager playbook : Task run update for staff"
+      - " - Yum low risk package"
+      - " - cPanel/WHM package "
+      - " - CPAN"
+      - " - PEAR"
+      
+- name: Display all variables/facts known for a host
+  debug:
+    msg : 
+      - "managed_by : {{managed_by }}"
+      - "package_name : {{package_name }}"
+      - "package_version : {{package_version }}"
+#TODO update all   
+#- name: upgrade all packages
+#  yum: name=* state=latest
+# ======================================================================
+# ======================== Yum update package ==========================
+# ======================================================================
+- name: yum update {{package_name}}
+  become: true
+  #yum:  name={{package_name}}  state={{package_version|default('latest')}} exclude={{exclude}} 
+  yum:  name={{package_name}} state=latest exclude={{exclude}} 
+  when: ansible_distribution == "CentOS" 
+        and managed_by is defined  and package_name != 'updateAll'
+        and package_name is defined 
+        and managed_by == "yum" 
+        and ( package_name != "" and package_name != "all" and package_name != "all packages")
+  register: yum_update
+  
+- name: yum update all package except excluse packages
+  become: true
+  yum:  name='*' state=latest  exclude={{exclude}} 
+  when: ansible_distribution == "CentOS" 
+        and managed_by is defined 
+        and package_name is defined 
+        and managed_by == "yum" 
+        and (package_name == 'updateAll' or package_name == 'all' or package_name == 'all packages')
+  register: yum_update_all
+  
+#- name: yum update {{package_name}}
+#  become: true
+#  yum: 
+#   name : "{{package_name}}"
+#    state : latest
+#    update_cache: yes
+#  when: ansible_distribution == "CentOS" and managed_by == "yum" and {{package_name}} 
+#  register: yum_update
+    
+  
+#yum: pkg=httpd-{{ httpd_version | default('*') }} state=latest
+#  
+#- debug:
+#    var: yum_update
+
+# ======================================================================
+# ======================== cPanel/WHM update package ===================
+# ======================================================================
+# ==== verify cpanel
+- stat:
+    path: /usr/local/cpanel/cpanel
+  register: cpanel_bin
+  
+- debug:
+    msg: "This host isn't cPanel"
+  when: cpanel_bin.stat.islnk is not defined
+
+- name: Check cPanel is installed on the server
+  command: /usr/local/cpanel/cpanel -V 2>/dev/null
+  register: is_cpanel
+  when: managed_by == "cpanel" and cpanel_bin.stat.exists is defined and cpanel_bin.stat.exists
+  check_mode: yes
+  
+# ==== include task cpanel=====
+- name: Task 10. cPanel
+  include: cpanel_task.yaml
+  register: cpanel_task
+  when: managed_by == "cpanel" and cpanel_bin.stat.exists is defined and cpanel_bin.stat.exists and is_cpanel
+
+# ======================================================================
+# ======================== DA update package ===========================
+# ======================================================================
+# ==== da check
+- stat:
+    path: /usr/local/directadmin/custombuild/build
+  register: da_build
+  
+- name: Pre-Task check DA installed
+  command: /usr/local/directadmin/custombuild/build version 2>/dev/null
+  register: is_da
+  ignore_errors: True
+  when : da_build.stat.exists is defined and da_build.stat.exists
+#  check_mode: yes
+
+# ==== da update
+- name: DA update {{package_name}}
+  become: true
+  command: /usr/local/directadmin/custombuild/build {{package_name}}
+  when: 
+    - managed_by == "da" 
+    - da_build.stat.exists is defined and da_build.stat.exists
+    - is_da 
+    - package_name
+  register: da_update
+  
+# ======================================================================
+# ======================== CPAN ========================================
+# ======================================================================
+- cpanm:
+    name: "{{package_name}}"
+    version: "{{package_version}}"
+    system_lib: yes
+  when: managed_by == "cpan" and package_name
+  become: true
+  register: cpan_update
+  
+# ======================================================================
+# ======================== PEAR ========================================
+# ======================================================================
+- pear:
+    name: "{{package_name}}"
+    state: latest
+  when: managed_by == "pear" and package_name 
+  become: true
+  register: pear_update
+    
+# ======================================================================
+# ======================== CloudLinux update package ===================
+# ======================================================================
+- name: Pre-Task Check CloudLinux status
+  shell: uname -r | grep lve 2>/dev/null
+  register: is_cloudlinux
+  ignore_errors: True
+  check_mode: yes
+  
+- name: cloudlinux update {{package_name}}
+  become: true
+  yum: 
+    name : "{{package_name}}" 
+    state : latest
+    enablerepo: cloudlinux-updates-testing
+    update_cache: yes
+    
+  when: managed_by == "cloudlinux" and package_name and is_cloudlinux
+  register: cloudlinux_update
+  
+# ======================================================================
+# ======================== kernel update package =======================
+# ======================================================================
+#kernelcare check
+- name: Pre-Task check Kernelcare installed
+  shell: /usr/bin/kcarectl --version 2>/dev/null
+  register: is_kernelcare
+  ignore_errors: True
+  check_mode: yes
+#kernelcare update
+- name: kernelcare update {{package_name}}
+  become: true
+  command: /usr/bin/kcarectl --update
+  when: 
+    - managed_by == "kernel" 
+    - is_kernelcare 
+    - package_name == "kernel" or package_name == "kernelcare"
+  register: kernel_update
+  
+#Ksplice check
+- name: Pre-Task check Ksplice installed
+  shell: uptrack-uname -r 2>/dev/null
+  register: is_ksplice
+  ignore_errors: True
+  check_mode: yes
+#Ksplice update
+- name: kernelcare update {{package_name}}
+  become: true
+  command: /usr/bin/kcarectl --update
+  when: 
+    - managed_by == "kernel" 
+    - is_ksplice
+    - package_name == "kernel" or package_name | search("uptrack")
+  register: kernel_update
+
+# ======================================================================
+# ======================== Compiled by source ==========================
+# ======================================================================
+#TODO
+
+
+# ======================================================================
+# ======================== Run Agent ===================================
+# ======================================================================
+# Agent update
+- name: Check hostname ==> hostname --fqd
+  become: true
+  shell: echo "$(date)" > /usr/local/ezyadmin/agent/watch
+  register: AgentUpdateNow
+  ignore_errors: True

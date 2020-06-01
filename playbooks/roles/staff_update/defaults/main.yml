@@ -1,0 +1,27 @@
+---
+#type of group command
+#managed_by : "da"
+
+#Update package name
+#package_name : "Pure-FTPd"
+
+#Update package version
+#package_version : ""
+
+
+
+
+
+#Allow manage_by list
+allow_command_managed :
+- yum
+- cpanel
+- da
+- plesk
+- cpan
+- pear
+- cloudlinux
+- kernel
+- source
+
+

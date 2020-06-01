@@ -1,0 +1,20 @@
+---
+#fusioninventory: []
+# defaults file for enalean.fusioninventory-agent
+#
+
+# The server which we send informations
+#fusioninventory_server: "http://192.168.100.80:8888/inventory"
+
+# A path for an ssl cert file
+#fusioninventory_cert: ""
+
+# Package to install
+#fusioninventory_deb_pkg: "fusioninventory-agent"
+#fusioninventory_rhel_pkg: "fusioninventory-agent"
+
+# Where to install agent configuration
+#fusioninventory_conf_dir: "/etc/fusioninventory"
+
+#perl_packages
+perl_packages : [ "YAML", "JSON", "Linux::Distribution"]

@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: true
+  vars_files: 
+    - group_vars/global
+  roles:
+    - role: global
+      tags: global
+    - role: admin_install
+      tags: admin_install

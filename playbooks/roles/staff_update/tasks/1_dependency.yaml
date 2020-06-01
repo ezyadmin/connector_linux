@@ -1,0 +1,23 @@
+---
+- debug:
+    msg: "Task 1. Check dependency content"
+    
+- name: Install fusioninventory-agent for Debian-like distros
+  apt: name="{{fusioninventory_deb_pkg}}" state=present
+  when: ansible_os_family == 'Debian'
+  notify: FusionInventory agent first execution
+
+- name: Install EPEL repository for RHEL-like distros
+  yum: name=epel-release state=present
+  when: ansible_os_family == 'RedHat'
+  
+# ===================== subversion =============================
+#TODO change subversion to git server
+- name: Install subversion for Debian-like distros
+  apt: name="{{subversion}}" state=present
+  when: ansible_os_family == 'Debian'
+  
+- name: Install subversion for RHEL-like distros
+  yum: name="{{subversion}}" state=present
+  when: ansible_os_family == 'RedHat'
+# ===================== subversion =============================

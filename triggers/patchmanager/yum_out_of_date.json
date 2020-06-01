@@ -1,0 +1,41 @@
+{
+  "name": "Low risk packages are out-of-date",
+  "enable": true,
+  "groups": ["Package Managed by YUM"],
+  "priority": "low",
+  "mutiIncident": "yes",
+  "category": "Performance",
+  "kb": "",
+  "alerts": [],
+  "autoResolve": {
+    "enable": "yes",
+    "notOccur": false,
+    "notOccurFor": "15",
+    "withCondition": true
+  },
+  "noevent": {
+    "enable": "no",
+    "updateby": "api",
+    "noapidata": "1d",
+    "noemaildata": true
+  },
+  "conditions": [
+    [
+      {
+        "condition": "%begin%",
+        "mailtype": "%mail_subject%",
+        "message": "Yum packages are out-of-date"
+      }
+    ]
+  ],
+  "autoResolveConditions": [
+    [
+      {
+        "condition": "%begin%",
+        "mailtype": "%mail_subject%",
+        "message": "Yum packages are are latest version"
+      }
+    ]
+  ],
+  "noeventEmailConditions": []
+}

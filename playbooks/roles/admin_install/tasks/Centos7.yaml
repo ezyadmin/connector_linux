@@ -1,0 +1,15 @@
+---
+#- systemd:
+#    name: ezyadmin.service
+#   daemon_reload: yes
+#    enabled: yes
+#   state: restarted
+
+- name: Register sysv ezyadmin_agent
+  become: true
+  systemd: name=ezyadmin.service daemon_reload=yes enabled=yes state=restarted
+
+#https://techarena51.com/index.php/how-to-create-an-init-script-on-centos-6/
+# systemctl daemon-reload
+# systemctl start ezyadmin.service
+# systemctl stop ezyadmin.service

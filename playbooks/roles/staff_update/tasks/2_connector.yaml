@@ -1,0 +1,25 @@
+---
+- name: Install fusioninventory-agent for RHEL-like distros
+  yum: name="{{fusioninventory_rhel_pkg}}" state=present
+  when: ansible_os_family == 'RedHat'
+  notify: FusionInventory agent first execution
+
+- name: Deploy agent configuration
+  template: src="agent.cfg.{{ansible_os_family}}.j2" dest="{{fusioninventory_conf_dir}}/agent.cfg" owner=root group=root mode=0644
+  
+- name: Creates directory /usr/local/ezyadmin
+  file: path=/usr/local/ezyadmin/ state=directory mode=0775
+  
+#TODO change subversion to git server
+- subversion:
+    repo: svn://svn.rvglobalsoft.net/trunk/rvpanel/connector/softwaremanagement/backend/agent
+    dest: /usr/local/ezyadmin/agent
+    checkout: yes
+    update: yes
+    username : wirasak
+    password : gvlwvgv=5487
+    
+- cpanm:
+    name: YAML JSON
+    system_lib: yes
+    
