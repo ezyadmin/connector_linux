@@ -1,0 +1,30 @@
+---
+fusioninventory: []
+# defaults file for enalean.fusioninventory-agent
+#
+
+# The server which we send informations
+fusioninventory_server: "http://api.ezyadmin.com/inventory"
+
+# A path for an ssl cert file
+fusioninventory_cert: ""
+
+# Package to install
+fusioninventory_deb_pkg: "fusioninventory-agent"
+fusioninventory_rhel_pkg: "fusioninventory-agent"
+
+subversion : "subversion"
+
+# Where to install agent configuration
+fusioninventory_conf_dir: "/etc/fusioninventory"
+
+yum_exlude: "httpd* mod_ssl* mysql* nsd* php* kernel*"
+yum_exlude:custom:
+   -
+   - 
+   - 
+yum_httpd_conf:
+  notification: 1
+  autochange: 1
+ 
+   

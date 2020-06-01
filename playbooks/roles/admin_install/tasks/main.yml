@@ -1,0 +1,114 @@
+---
+- name: Display all variables/facts known for a host
+  debug:
+    msg : 
+      - "1. check dependency"
+      - "2. install/update connector "
+      - "3. Add daemon to service/systemd"
+      - "4. configure firewall"
+      - "5. configure SELinux"
+      - "6. install/update app"
+      - "7. configure database"
+      - "8. configure web server"
+      - "9. register inventory"
+      - "10. if cpanel : run config cpanel -> monitor && check service daemon"
+      - "11. configure logrotate"
+      - "12. configure garbage , tmpwatch"
+      - "13. configure cron"
+    
+# ============= Default Task ===============
+# 1. check dependency
+- name: Task 1. Check dependency
+  include: 1_dependency.yaml
+  register: dependency_file
+  
+# 2. install/update connector 
+- include: 2_connector.yaml
+  name: "Task 2. Install/Update Connector"
+#  static: no
+  register: connector_file
+#  failed_when: false
+#  ignore_errors: True
+
+# 3. Add daemon to service/systemd
+- name: Task 4. Add daemon to service/systemd
+  include: 3_daemon.yaml
+  register: daemon_file
+  
+# 4. configure firewall
+- name: Task 4. configure firewall
+  include: 4_config_firewall.yaml
+  register: config_firewall_file
+  
+# 5. configure SELinux
+- name: Pre-Task 5. Check SELinux status
+  shell: getenforce 2>/dev/null
+  register: selinux_test
+  ignore_errors: True
+  check_mode: yes
+
+- name: Task 5. Configure SELinux
+  include: 5_config_selinux.yaml
+  register: config_selinux_file
+  when: selinux_test is defined and selinux_test == 'Enable'
+  
+# 6. install/update app
+- name: Task 6. install/update app
+  include: 6_app.yaml
+  register: app_file
+  
+# 7. configure database
+- name: Task 7. Configure SELinux
+  include: 7_config_db.yaml
+  register: config_db_file
+  
+# 8. configure web server
+- name: Task 8. Configure Web Server
+  include: 8_config_webserver.yaml
+  register: config_webserver_file
+  
+# 9. register inventory
+- name: Task 9. Register Inventory
+  include: 9_register_inventory.yaml
+  register: register_inventoryr_file
+  
+# 10. if cpanel : run config cpanel -> monitor && check service daemon
+- stat:
+    path: /usr/local/cpanel/cpanel
+  register: cpanel_bin
+#- fail:
+#    msg: "This host isn't cPanel"
+#  when: cpanel_bin.stat.exists is defined and cpanel_bin.stat.exists
+#  ignore_errors: yes
+#- debug : var=cpanel_bin
+
+- debug:
+    msg: "This host isn't cPanel"
+  when: cpanel_bin.stat.islnk is not defined
+
+- name: Check cPanel is installed on the server
+  #command: /usr/local/cpanel/cpanel -V 2>/dev/null
+  shell: /usr/local/cpanel/cpanel -V 2>/dev/null
+  register: cPanelVersion
+  when: cpanel_bin.stat.exists is defined and cpanel_bin.stat.exists
+  check_mode: yes
+  
+- name: Task 10. cPanel
+  include: 10_cpanel.yaml
+  register: cpanel_file
+  when: cpanel_bin.stat.exists is defined and cpanel_bin.stat.exists
+
+# 11. configure logrotate
+# 12. configure garbage , tmpwatch
+# 13. configure cron
+#TODO change subversion to git server
+#- cron:
+#    name: "EzyAdmin cron daily"
+#   special_time: daily
+#    job: "/usr/local/ezyadmin/agent/ezyadmin_patchmgr_update.sh"
+- cron:
+    name: "EzyAdmin Cron"
+    minute: "0"
+    hour: "1"
+    job: "perl -le 'sleep rand 9000' && /usr/local/ezyadmin/agent/ezyadmin_patchmgr_update.sh"
+# ============= Default Task ===============

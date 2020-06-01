@@ -1,0 +1,15 @@
+---
+desctiption: "Yum Manager" 
+package_httpd_notif:
+    _desc: "Yum exclude package 'httpd' notification"
+    _type: "radio"
+    _list: 
+      - Event
+      - Incident
+
+package_httpd_auto_create_change:
+    _desc: "Yum exclude package 'httpd' auto create change request"
+    _type: "radio"
+    _list: 
+      - Yes
+      - No

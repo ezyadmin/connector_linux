@@ -1,0 +1,92 @@
+---
+- debug:
+    msg: 'Task 1. Check dependency content'
+
+- name: Check hostname ==> hostname --fqd
+  shell: hostname --fqd 2>/dev/null
+  register: hostname_result
+  ignore_errors: True
+
+- block:
+    - name: 'Check hostname ==> hostname --fqd not pass'
+      debug:
+        msg: 'Please setting  HOSTNAME and FQDN , then try again.'
+
+    - fail:
+        msg: 'Please setting HOSTNAME and FQDN , then try again.'
+
+    - meta: end_play
+  when: hostname_result.rc >= 1
+
+- name: Creates directory ezyadmin tmp
+  become: true
+  file:
+    path: /usr/local/ezyadmin/tmp
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+
+- name: install cpan and perl-devel
+  become: true
+  yum:
+    name: '{{ packages }}'
+    state: present
+  vars:
+    packages:
+      - perl
+      - perl-devel
+      - perl-CPAN
+  when: ansible_os_family == 'RedHat'
+
+- name: download cpanm
+  become: true
+  get_url: url=http://cpanmin.us/
+    dest=/usr/local/ezyadmin/tmp/cpanm.pl
+    mode=755
+
+- name: install cpanm so that we can use the ansible cpanm module
+  become: true
+  #command: perl cpanm.pl App::cpanminus
+  shell: perl cpanm.pl App::cpanminus
+  #command:  curl -L http://cpanmin.us | perl - --sudo App::cpanminus
+  args:
+    chdir: /usr/local/ezyadmin/tmp/
+    creates: /usr/local/bin/cpanm
+
+- name: Check cpanm bin path
+  become: true
+  stat:
+    path: /usr/bin/cpanm
+  register: cpanm_bin
+
+- name: add cpanm symbolic link to /usr/bin/
+  become: true
+  file: src=/usr/local/bin/cpanm
+    dest=/usr/bin/cpanm
+    state=link
+    force=no
+  when: cpanm_bin.stat.exists == False
+
+- name: install Perl packages
+  become: true
+  cpanm:
+    name: '{{ item }}'
+    notest: True
+    system_lib: yes
+  with_items: '{{perl_packages}}'
+  when: ansible_os_family == 'RedHat'
+# - name: Install fusioninventory-agent for Debian-like distros
+#   become: true
+#   apt:
+#     name: "{{fusioninventory_deb_pkg}}"
+#     state: present
+#   when: ansible_os_family == 'Debian'
+#   notify: FusionInventory agent first execution
+
+# - name: Install EPEL repository for RHEL-like distros
+#   become: true
+#   yum:
+#     name: epel-release
+#     state: present
+#   when: ansible_os_family == 'RedHat'

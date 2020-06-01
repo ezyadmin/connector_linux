@@ -1,0 +1,10 @@
+---
+package_httpd_notif: "Incident"
+package_httpd_auto_create_change: True
+package_mod_ssl_notif: "Incident"
+package_mod_ssl_auto_create_change: True
+
+
+other_exclude:
+  - bind_chroot
+  - couier

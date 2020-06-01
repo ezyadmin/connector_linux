@@ -1,0 +1,103 @@
+---
+# ============= Default Task ===============
+# 1. check dependency
+- include: 1_dependency.yml
+  register: dependency_file
+  when: dependency_file.stat.exists
+  ignore_errors: True
+# 2. install/update connector
+# 3. configure firewall
+# 4. configure SELinux
+# 5. install/update app
+# 6. configure database
+# 7. configure database
+# 8. configure web server
+# 9. register inventory
+# 10. if cpanel
+#       - run config cpanel -> monitor
+#       - check service daemon
+# 11. configure logrotate
+# 12. configure garbage , tmpwatch
+# 13. configure cron
+# ============= Default Task ===============
+
+# tasks file for enalean.fusioninventory-agent
+#
+
+- name: Install fusioninventory-agent for Debian-like distros
+  apt: name="{{fusioninventory_deb_pkg}}" state=present
+  when: ansible_os_family == 'Debian'
+  notify: FusionInventory agent first execution
+
+- name: Install EPEL repository for RHEL-like distros
+  yum: name=epel-release state=present
+  when: ansible_os_family == 'RedHat'
+
+- name: Install fusioninventory-agent for RHEL-like distros
+  yum: name="{{fusioninventory_rhel_pkg}}" state=present
+  when: ansible_os_family == 'RedHat'
+  notify: FusionInventory agent first execution
+
+- name: Deploy agent configuration
+  template: src="agent.cfg.{{ansible_os_family}}.j2" dest="{{fusioninventory_conf_dir}}/agent.cfg" owner=root group=root mode=0644
+
+- name: Creates directory /usr/local/ezyadmin
+  file: path=/usr/local/ezyadmin/ state=directory mode=0775
+
+#TODO change subversion to git server
+- subversion:
+    repo: svn://svn.rvglobalsoft.net/trunk/rvpanel/connector/softwaremanagement/backend/agent
+    dest: /usr/local/ezyadmin/agent
+    checkout: yes
+    update: yes
+    username: wirasak
+    password: gvlwvgv=5487
+
+- cpanm:
+    name: YAML JSON
+    system_lib: yes
+
+#- name: Start EzyAdmin Daemon
+#  #shell: "start-stop-daemon --start --quiet --pidfile /var/run/ezyadmin_agent --exec /usr/local/ezyadmin/agent/ezyadmin_agent"
+#  shell: /usr/bin/nohup /usr/local/ezyadmin/agent/ezyadmin_agent 0<&- &> /usr/local/ezyadmin/agent/ezyadmin.log &
+
+#- name: Start EzyAdmin Daemon
+#  command: /usr/bin/nohup /usr/local/ezyadmin/agent/ezyadmin_agent 0<&- &> /usr/local/ezyadmin/agent/ezyadmin.log &
+#  run_once: true
+
+#- copy:
+#    src: /usr/local/ezyadmin/agent/ezyadmin/ezyadmin_daemon
+#    dest: /etc/init.d/ezyadmin_daemon
+#    owner: root
+#    group: root
+#    mode: 0644
+
+### for centos <= 6
+- name: install rhel sysv ezyadmin_agent init script
+  copy: src=../../../files/agent/ezyadmind dest=/etc/init.d/ezyadmind owner=root group=root mode=0755
+  when: ansible_distribution == "CentOS" and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+- name: enable sysv ezyadmin_agent service
+  service: name=ezyadmind enabled=yes
+  when: ansible_distribution == "CentOS" and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+- name: start ezyadmind
+  service: name=ezyadmind state=started
+  when: ansible_distribution == "CentOS" and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+### for centos 7
+- name: install rhel sysv ezyadmin_agent init script
+  copy: src=../../../files/agent/ezyadmin.service dest=/etc/systemd/system/ezyadmin.service owner=root group=root mode=0755
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+- include: Centos7.yaml
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+#- systemd:
+#    name: ezyadmin.service
+#    daemon_reload: yes
+#    enabled: yes
+#    when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+#- service:
+#    name: ezyadmind
+#    state: started

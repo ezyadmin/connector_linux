@@ -1,0 +1,82 @@
+---
+# Add copr-be.cloud.fedoraproject.org repo
+- name: Add copr-be.cloud.fedoraproject.org repo on centos 6
+  yum_repository:
+    name: Copr repo for fusioninventory-agent owned by trasher
+    description: Copr repo for fusioninventory-agent owned by trasher
+    file: fusioninventory
+    baseurl: https://copr-be.cloud.fedoraproject.org/results/trasher/fusioninventory-agent/epel-6-$basearch/
+    gpgcheck: yes
+  when: ansible_os_family == 'RedHat' and ( ansible_distribution_version == '6' or ansible_distribution_version == '5')
+
+- name: Add copr-be.cloud.fedoraproject.org repo on centos 7
+  yum_repository:
+    name: Copr repo for fusioninventory-agent owned by trasher
+    description: Copr repo for fusioninventory-agent owned by trasher
+    file: fusioninventory
+    baseurl: https://copr-be.cloud.fedoraproject.org/results/trasher/fusioninventory-agent/epel-7-$basearch/
+    gpgcheck: yes
+  when: ansible_os_family == 'RedHat' and ansible_distribution_version == '7'
+
+# install fusioninventory-agent
+- name: Install fusioninventory-agent for RHEL-like distros
+  become: true
+  #yum: name="{{fusioninventory_rhel_pkg}}" state=present
+  when: ansible_os_family == 'RedHat'
+  notify: FusionInventory agent first execution
+  yum:
+    name: '{{ packages }}'
+    state: present
+  vars:
+    packages:
+      - fusioninventory-agent
+      - fusioninventory-agent-task-inventory
+
+- name: Creates directory fusioninventory config
+  become: true
+  file:
+    path: /etc/fusioninventory
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+
+- name: Deploy agent configuration
+  become: true
+  template: src="agent.cfg.{{ansible_os_family}}.j2" dest="{{fusioninventory_conf_dir}}/agent.cfg" owner=root group=root mode=0644
+
+- name: Creates directory /usr/local/ezyadmin
+  become: true
+  file: path=/usr/local/ezyadmin/ state=directory mode=0775 recurse=yes
+
+- name: Creates directory /usr/local/ezyadmin/agent
+  become: true
+  file: path=/usr/local/ezyadmin/agent state=directory mode=0775 recurse=yes
+
+- name: get the list of agent file
+  become: true
+  local_action: "shell ls files/* | sed 's~.*/~~g'"
+  register: files_to_copy
+
+- name: copy files
+  become: true
+  copy:
+    src: '../../../files/agent/{{ item }}'
+    dest: '/usr/local/ezyadmin/agent'
+    owner: root
+    group: root
+    #remote_src: True
+    mode: 0755
+    force: yes
+  with_items:
+    - '{{ files_to_copy.stdout_lines }}'
+
+- name: ensure file exists
+  become: true
+  copy:
+    content: ''
+    dest: /usr/local/ezyadmin/agent/linux
+    force: no
+    group: root
+    owner: root
+    mode: 0666

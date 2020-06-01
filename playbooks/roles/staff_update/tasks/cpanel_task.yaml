@@ -1,0 +1,15 @@
+---
+# ==== task : cpanel update
+- name: DA update {{package_name}}
+  command: /scripts/upcp
+  when: 
+    - managed_by == "cp" 
+    - package_name == "cpanel"
+  register: cpanel_update
+
+# ==== task : EasyApache4 update
+# ==== task : MySQL update
+# ==== task : PHP update
+# ==== task : FTP- server update
+# ==== task : SpamAssassin update
+# ==== task : SpamAssassin Rule update

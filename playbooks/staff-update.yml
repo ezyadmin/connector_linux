@@ -1,0 +1,12 @@
+---
+- hosts: all
+  gather_facts: true
+  vars_files: 
+    - group_vars/global
+    - extravar.json
+    
+  roles:
+    - role: global
+      tags: global
+    - role: staff_update
+      tags: staff_update

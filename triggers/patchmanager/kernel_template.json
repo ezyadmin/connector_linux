@@ -1,0 +1,41 @@
+{
+  "name": "##name## package are out-of-date",
+  "enable": true,
+  "groups": ["Kernel Managed by 3rd Party"],
+  "priority": "low",
+  "mutiIncident": "yes",
+  "category": "Performance",
+  "kb": "",
+  "alerts": [],
+  "autoResolve": {
+    "enable": "yes",
+    "notOccur": false,
+    "notOccurFor": "15",
+    "withCondition": true
+  },
+  "noevent": {
+    "enable": "no",
+    "updateby": "api",
+    "noapidata": "1d",
+    "noemaildata": true
+  },
+  "conditions": [
+    [
+      {
+        "condition": "%begin%",
+        "mailtype": "%mail_subject%",
+        "message": "##name## package are out-of-date"
+      }
+    ]
+  ],
+  "autoResolveConditions": [
+    [
+      {
+        "condition": "%begin%",
+        "mailtype": "%mail_subject%",
+        "message": "##name## package are are latest version"
+      }
+    ]
+  ],
+  "noeventEmailConditions": []
+}

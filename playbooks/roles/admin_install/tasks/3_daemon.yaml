@@ -1,0 +1,64 @@
+---
+- name: Create log file /var/log/ezyadmind.err
+  file: path=/var/log/ezyadmind.err mode=0666 owner=root group=root state=touch
+  become: true
+
+# - name: Create log file /var/run/ezyadmind.pid
+#   file: path=/var/run/ezyadmind.pid mode=0666 owner=root group=root state=touch
+#   become: true
+
+- name: Change mod /usr/local/ezyadmin/agent/ezyadmin_agent
+  file: path=/usr/local/ezyadmin/agent/ezyadmin_agent mode=0755 owner=root group=root
+  become: true
+
+### for centos <= 6
+- name: install rhel ezyadmin_agent init script
+  become: true
+  copy: src=../../../files/agent/ezyadmind dest=/etc/init.d/ezyadmind owner=root group=root mode=0755 force=yes
+  when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+# - name: enable ezyadmin_agent service on server reboot
+#   become: true
+#   service: name=ezyadmind enabled=yes state=restarted
+#   when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+#   ignore_errors: True
+
+- name: started ezyadmind service on server reboot
+  become: true
+  service:
+    name: ezyadmind
+    enabled: yes
+    state: started
+  ignore_errors: yes
+  when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+- name: stop ezyadmind service
+  become: true
+  service:
+    name: ezyadmind
+    enabled: yes
+    state: stopped
+  ignore_errors: yes
+  when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+- name: started ezyadmind service
+  become: true
+  service:
+    name: ezyadmind
+    enabled: yes
+    state: started
+  ignore_errors: yes
+  when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ( ansible_distribution_major_version == "5" or ansible_distribution_major_version == "6")
+
+### for centos 7
+- name: install rhel sysv ezyadmin_agent init script
+  become: true
+  copy: src=../../../files/agent/ezyadmin.service dest=/etc/systemd/system/ezyadmin.service owner=root group=root mode=0755
+  when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ansible_distribution_major_version == "7"
+
+- include: Centos7.yaml
+  when: (ansible_distribution == "CentOS" or ansible_distribution == "CloudLinux") and ansible_distribution_major_version == "7"
+#https://techarena51.com/index.php/how-to-create-an-init-script-on-centos-6/
+# systemctl daemon-reload
+# systemctl start ezyadmin.service
+# systemctl stop ezyadmin.service
