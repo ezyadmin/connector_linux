@@ -1,10 +1,41 @@
 ---
-- hosts: all
-  gather_facts: true
-  vars_files: 
-    - group_vars/global
-  roles:
-    - role: global
-      tags: global    
-    - role: admin_install
-      tags: admin_install
+- name: Install connector_patch_manager
+  hosts: all
+
+  tasks:
+    - name: Create a directory ezyadmin
+      file:
+        path: /usr/local/ezyadmin
+        state: directory
+        mode: "0755"
+      become: True
+
+    - name: Download file
+      get_url:
+        url: https://github.com/ezyadmin/connector_patch_manager/archive/latest.tar.gz
+        dest: /usr/local/ezyadmin/connector_patch_manager.tar.gz
+      become: True
+
+    - name: tar file
+      shell: tar -zxvf /usr/local/ezyadmin/connector_patch_manager.tar.gz -C /usr/local/ezyadmin
+      become: True
+
+    - name: Execute the script
+
+      command: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
+      args:
+        chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
+      become: True
+
+    - name: Execute the script
+      command: /usr/local/bin/ezinstall_patch_mgr --linux
+      become: True
+# - hosts: all
+#   gather_facts: true
+#   vars_files:
+#     - group_vars/global
+#   roles:
+#     - role: global
+#       tags: global
+#     - role: admin_install
+#       tags: admin_install
