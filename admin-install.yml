@@ -25,7 +25,8 @@
         src: "https://github.com/ezyadmin/connector_patch_manager/archive/latest.tar.gz"
         dest: "/usr/local/ezyadmin"
         remote_src: yes
-
+      become: True
+      
     - name: Execute the script
       command: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
       args:
