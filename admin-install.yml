@@ -40,5 +40,5 @@
       become: True
 
     - name: Execute the script
-      command: /usr/local/bin/ezinstall_patch_mgr --all
+      command: /usr/local/bin/ezinstall_patch_mgr --linux
       become: True
