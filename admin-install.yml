@@ -45,6 +45,5 @@
       ignore_errors: True
       become: True
 
-    - name : Dump
-      debug:
-        msg : {{command_exec}}
+    - debug:
+        msg : "{{ command_exec }}"
