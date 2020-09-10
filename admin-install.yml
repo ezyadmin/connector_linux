@@ -41,4 +41,10 @@
 
     - name: Execute the script
       command: /usr/local/bin/ezinstall_patch_mgr --linux
+      register: command_exec
+      ignore_errors: True
       become: True
+
+    - name : Dump
+      debug:
+        msg : {{command_exec}}
