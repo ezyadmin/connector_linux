@@ -69,3 +69,4 @@
         minute: "0"
         hour: "1"
         job: "sleep $((RANDOM%3600)) && /usr/local/ezyadmin/agent/update.sh"
+      become: True
