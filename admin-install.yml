@@ -60,3 +60,4 @@
         hour: "1"
         job: "sleep $((RANDOM%3600)) && /usr/local/ezyadmin/agent/update.sh"
       become: True
+      ignore_errors: True
