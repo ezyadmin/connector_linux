@@ -33,23 +33,23 @@
     #    remote_src: yes
     #  become: True
       
-    - name: Execute the script
-      command: chmod 755 /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
+    - name: Change permission
+      shell: chmod 755 /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
       become: True
       ignore_errors: True
 
-    - name: Execute the script
-      command: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
-      args:
-        chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
+    - name: Setup
+      shell: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
+      # args:
+      #   chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
       become: True
       ignore_errors: True
 
-    - name: Execute the script
-      command: /usr/local/bin/ezinstall_patch_mgr --linux
+    - name: Activate Linux
+      shell: /usr/local/bin/ezinstall_patch_mgr --linux
       register: command_exec
       ignore_errors: True
       become: True
 
     - debug:
-        msg : "{{ command_exec.stdout_lines }}"
+        msg : "{{ command_exec }}"
