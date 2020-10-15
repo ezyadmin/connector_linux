@@ -19,19 +19,6 @@
     - name: tar file
       shell: tar -zxvf /usr/local/ezyadmin/connector_patch_manager.tar.gz -C /usr/local/ezyadmin
       become: True
-
-    #- name: Download my software from internal IT repository and extract the package
-    #  unarchive:
-    #    src: "https://github.com/ezyadmin/connector_patch_manager/archive/latest.tar.gz"
-    #    dest: "/usr/local/ezyadmin"
-    #    remote_src: yes
-    #  become: True
-    #- name: Download my software from internal IT repository and extract the package
-    #  unarchive:
-    #    src: "/usr/local/ezyadmin/connector_patch_manager.tar.gz"
-    #    dest: "/usr/local/ezyadmin"
-    #    remote_src: yes
-    #  become: True
       
     - name: Change permission
       shell: chmod 755 /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
@@ -40,19 +27,14 @@
 
     - name: Setup
       shell: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh
-      # args:
-      #   chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
       become: True
       ignore_errors: True
 
-    - name: Activate Linux
+    - name: Activate Connector Linux
       shell: /usr/local/bin/ezinstall_patch_mgr --linux
       register: command_exec
       ignore_errors: True
       become: True
-
-    # - debug:
-    #     msg : "{{ command_exec }}"
 
     - name: Update latest version
       shell: chmod 755 /usr/local/ezyadmin/agent/update.sh
