@@ -31,13 +31,21 @@
     #     chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install/
     #   become: True
     #   ignore_errors: True
+    
     - name: Setup
       command: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh > install.log
       args:
         chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
       become: True
       ignore_errors: True
-
+      
+    - name: This command will change the working directory to somedir/
+      shell:
+        cmd: /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh >> /usr/local/ezyadmin/connector_patch_manager-latest/install/install.log
+        chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
+      become: True
+      ignore_errors: True
+      
     - name: Activate Connector Linux
       shell: /usr/local/bin/ezinstall_patch_mgr --linux
       register: command_exec
