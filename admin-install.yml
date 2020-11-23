@@ -32,12 +32,12 @@
     #   become: True
     #   ignore_errors: True
     
-    - name: Setup
-      command: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh > install.log
-      args:
-        chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
-      become: True
-      ignore_errors: True
+    #- name: Setup
+    #  command: sh /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh > install.log
+    #  args:
+    #    chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
+    #  become: True
+    #  ignore_errors: True
       
     - name: This command will change the working directory to somedir/
       shell:
