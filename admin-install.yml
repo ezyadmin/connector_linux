@@ -55,8 +55,13 @@
       
     - name: Update latest version
       shell: chmod 755 /usr/local/ezyadmin/agent/update.sh
-      register: command_update
       become: True
+      ignore_errors: True
+      
+    - name: Update latest version	
+      shell: /usr/local/ezyadmin/agent/update.sh	
+      register: command_update
+      become: True	
       ignore_errors: True
       
     - cron:
