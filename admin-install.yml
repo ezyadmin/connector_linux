@@ -43,6 +43,7 @@
       shell:
         cmd: /usr/local/ezyadmin/connector_patch_manager-latest/install/install.sh >> /usr/local/ezyadmin/connector_patch_manager-latest/install/install.log
         chdir: /usr/local/ezyadmin/connector_patch_manager-latest/install
+      register: command_install
       become: True
       ignore_errors: True
       
@@ -51,17 +52,13 @@
       register: command_exec
       ignore_errors: True
       become: True
-
+      
     - name: Update latest version
       shell: chmod 755 /usr/local/ezyadmin/agent/update.sh
+      register: command_update
       become: True
       ignore_errors: True
-
-    - name: Update latest version
-      shell: /usr/local/ezyadmin/agent/update.sh
-      become: True
-      ignore_errors: True
-
+      
     - cron:
         name: "EzyAdmin Patch Manager"
         minute: "0"
